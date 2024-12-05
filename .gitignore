@@ -1,0 +1,22 @@
+**/result
+result*
+**/result/
+# Emacs auto-save, etc.
+*~
+.#*
+*#
+
+tags
+
+elpa
+*.elc
+# except:
+
+tmp
+
+*.ignore.*
+**/eln-cache
+**/ido.last
+transient/history.el
+custom.el
+old/

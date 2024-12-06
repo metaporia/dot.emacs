@@ -17,8 +17,6 @@
 ;;;; TODO
 ;; - outline mode (for elisp)
 ;; - bookmarks/session/common files in registers
-;; - evil-escape
-;; - evil: leader keys (,w ,b &c)
 
 ;;;; Load =.custom.el=
 
@@ -151,9 +149,20 @@
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-u-delete t)
+
   (setq evil-shift-width 2)
+  (setq evil-undo-system 'undo-redo)
   :config
   (evil-mode 1)
+
+  ;; some QOL nvim maps
+
+  ;; buffer nav
+  (evil-define-key 'normal 'global
+    (kbd "C-n") 'evil-next-buffer
+    (kbd "C-p") 'evil-prev-buffer
+    (kbd "C-k") 'evil-delete-buffer)
 
   ;; map c-g to escape or keyboard-quit (default)
   ;;
@@ -186,6 +195,8 @@
     "e" 'eval-last-sexp
     "w" 'save-buffer
     "b" 'list-buffers
+    "d" 'define-word
+    "," 'other-window
     )
 
   ;; Local Leader
@@ -207,6 +218,12 @@
   :config
   (evil-escape-mode)
   (setq-default evil-escape-key-sequence "jk"))
+
+(use-package evil-surround
+  :demand
+  :config
+  (global-evil-surround-mode))
+
 
 ;;;; Theme
 
@@ -246,3 +263,88 @@
          ("C-h f" . helpful-callable)
          )
   )
+
+
+;;;; Dico
+(defun define-word-wrapped (word)
+  "Read a word and pass it to dico(1)."
+  (with-output-to-temp-buffer "*dico-define*"
+    (shell-command (concat "d " word) "*dico-define*" "*Messages*")
+    (pop-to-buffer "*dico-define*")))
+
+(defun define-word ()
+  (interactive)
+  (define-word-wrapped (thing-at-point 'word () )))
+
+;;;; Completion
+
+(use-package emacs
+  :custom
+  (tab-always-indent 'complete)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  )
+
+(use-package corfu
+  :after evil evil-collection
+  :demand
+  :custom
+  ;; Enable cycling for `corfu-next/previous'
+  (corfu-cycle t)
+  (corfu-count 14)
+  (corfu-scroll-margin 6)
+  (corfu-preselect-first t)
+  
+  ; (corfu-preview-current t)
+  :init
+  (corfu-popupinfo-mode) ;; show doc previews
+  (global-corfu-mode)
+
+  ;; unbind org tab
+  :config
+  (define-key evil-insert-state-map (kbd "C-n")  #'completion-at-point)
+  (define-key evil-insert-state-map (kbd "C-e")  #'corfu-complete)
+
+  ;; these may be necessary for org-mode
+  ;;(evil-define-key 'insert 'org-mode-map (kbd "TAB") nil)
+  ;;(evil-define-key nil 'evil-insert-state-map (kbd "TAB") nil)
+  ;;(evil-define-key 'insert 'evil-org-mode (kbd "TAB") #'completion-at-point)
+  ;;(define-key evil-insert-state-map (kbd "C-n")  #'completion-at-point)
+  ;;(define-key evil-insert-state-map (kbd "C-e")  #'corfu-complete)
+  )
+
+;; Add extensions
+(use-package cape
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+  )
+
+(use-package kind-icon
+  :demand
+  :after corfu
+  :custom
+  (kind-icon-blend-background t)
+  (kind-icon-default-face 'corfu-default) ; only needed with blend-background
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+;;; Language Support
+
+;;;; Elisp
+
+;;(turn-on-eldoc-mode)

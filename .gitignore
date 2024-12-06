@@ -23,5 +23,7 @@ custom.el
 straight/
 
 places
-projects/
+projects
 history
+
+.cache/

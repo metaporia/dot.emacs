@@ -19,4 +19,5 @@ tmp
 **/ido.last
 transient/history.el
 custom.el
-old/
+
+straight/

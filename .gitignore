@@ -27,3 +27,5 @@ projects
 history
 
 .cache/
+old/
+bookmarks

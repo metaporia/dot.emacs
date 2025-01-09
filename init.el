@@ -650,6 +650,8 @@
                 ("n" "note" entry (file "~/org/refile.org")
                  "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
                 ("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Mental Health" "Bruce")
+                  "* Session Notes" :jump-to-captured 1)
+                ("p" "athey" entry (file+olp+datetree "~/org/mental.org" "Mental Health" "Athey")
                  "* Session Notes" :jump-to-captured 1)
                 ("j" "journal" entry (file+datetree "~/org/diary.org")
                  "* %?\n%U\n" :clock-in t :clock-resume t)
@@ -695,6 +697,14 @@
   (global-set-key "\C-cb" 'org-switchb)
   (global-set-key (kbd "C-'") 'org-cycle-agenda-files)
 
+  ;; custom agenda views (for monthly todos, &c.)
+  ;; nice to have an example to build off of as we refine our agenda workflow
+  (setq org-agenda-custom-commands '(("n" "Agenda and all TODOs"
+                                      ((agenda "")
+                                        (alltodo "")))
+                                     ("f" occur-tree "\\<FIXME\\>")
+                                     ))
+
   ;; latex image stuff
   (setq org-format-options (plist-put org-format-latex-options :scale 2.0))
   (setq org-latex-create-formula-image-program 'dvisvgm)
@@ -711,6 +721,7 @@
     (interactive)
     (org-map-entries #'org-fold-hide-subtree
                      "/+DONE" 'file 'archive 'comment))
+
 (defun my/org-toggle-archive-done-entries-in-buffer ()
     (interactive)
     (org-map-entries '(org-toggle-tag "ARCHIVE" 'on)

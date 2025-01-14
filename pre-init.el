@@ -1,5 +1,7 @@
 ;;; pre-init.el --- bootstrap straight.el -*- no-byte-compile: t; lexical-binding: t; -*-
 
+(setq use-package-always-ensure nil)
+
 ;; Straight
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -17,7 +19,5 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(use-package straight
-  :custom
-  (straight-use-package-by-default t)
-  )
+;(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)

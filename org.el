@@ -148,7 +148,7 @@
                  "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
                 ("n" "note" entry (file "~/org/refile.org")
                  "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-                ("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Mental Health" "Bruce")
+                ("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Bruce")
                   "* Session Notes" :jump-to-captured 1)
                 ("p" "athey" entry (file+olp+datetree "~/org/mental.org" "Mental Health" "Athey")
                  "* Session Notes" :jump-to-captured 1)

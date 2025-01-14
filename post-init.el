@@ -21,10 +21,24 @@
 
 (general-define-key "C-c r" (lambda () (interactive) (load-user-file "post-init.el")))
 
+;; list packages registered in current emacs session
+(general-define-key "C-c C-l p"
+                    (lambda () (interactive)
+                      (require 'subr-x)
+                      (dolist (package (sort (hash-table-keys straight--recipe-cache)
+                                             #'string-lessp))
+                        (scratch-buffer)
+                        (insert (format
+                                 "%25s | %s\n"
+                                 package (plist-get (gethash package straight--recipe-cache)
+                                                    :local-repo))))
+
+                                ))
+
 ;; highlight parens
 
 (use-package smartparens
-  :hook (prog-mode text-mode markdown-mode)
+  :hook (prog-mode markdown-mode)
   :custom
   (sp-show-pair-delay 0.08)
   :config
@@ -32,7 +46,7 @@
 
 ;; color parens
 (use-package rainbow-delimiters
-  :hook (prog-mode text-mode markdown-mode))
+  :hook (prog-mode markdown-mode))
 
 ;;;; Emacs
 
@@ -67,6 +81,7 @@
 ;;;; Helpful (better help w/ e.g., C-h k)
 
 (use-package helpful
+  :defer t
   :bind (
          ("C-h v" . helpful-variable)
          ("C-h k" . helpful-key)
@@ -296,9 +311,9 @@
 (setq custom-safe-themes t)
 
 
-;(use-package doom-modeline
-;  :init
-;  (doom-modeline-mode t))
+(use-package doom-modeline
+ :init
+ (doom-modeline-mode t))
 
 ;; for fresh install run M-x nerd-icons-install-fonts
 (use-package nerd-icons
@@ -340,6 +355,15 @@
 (add-hook 'after-init-hook #'save-place-mode)
 
 
+;;;; Magit
+
+(use-package magit
+  :defer t
+  :commands magit-status
+  :general
+  (leader :states 'normal ;:keymaps 'override
+    "g g" 'magit-status)
+  )
 
 ;;;; Which-key
 
@@ -353,4 +377,6 @@
 ;;;; Completion (corfu & vertico)
 
 (minimal-emacs-load-user-init "completion.el")
+
+
 

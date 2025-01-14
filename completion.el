@@ -26,6 +26,8 @@
   )
 
 
+
+
 (use-package marginalia
   ;; Marginalia allows Embark to offer you preconfigured actions in more contexts.
   ;; In addition to that, Marginalia also enhances Vertico by adding rich
@@ -179,3 +181,74 @@
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
 
 )
+
+
+;;;; Corfu
+(use-package corfu
+  :after evil evil-collection
+  ; remove for auto-complete rather than w/ manual trigger
+  :custom
+  ;; Enable cycling for `corfu-next/previous'
+  (corfu-cycle t)
+  (corfu-count 14)
+  (corfu-scroll-margin 6)
+  (corfu-preselect-first t)
+  ;;(global-corfu-minibuffer nil)
+  ;; (corfu-preview-current t)
+
+  (corfu-auto t)
+  ;;(corfu-seperator ?-)
+
+  :general
+  (general-define-key
+   :states 'insert
+   :keymaps 'global
+   (kbd "C-n")  'completion-at-point)
+  (general-define-key
+   :states 'insert
+   :keymaps 'corfu-map
+   (kbd "C-e")  'corfu-complete
+   ;;(kbd "TAB") 'corfu-next
+   (kbd "C-y")  'corfu-quit
+   (kbd "C-u") 'evil-delete-back-to-indentation)
+
+  :init
+  (corfu-popupinfo-mode) ;; show doc previews
+  (global-corfu-mode)
+  )
+
+;; Add extensions
+(use-package cape
+  :demand
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-dict)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+  )
+
+(use-package emacs
+  :custom
+
+  ;; tab cycle with few candidates
+  (completion-cycle-threshold 3)
+  (tab-always-indent 'complete)
+  ;; Disable Ispell completion function. As an alternative try `cape-dict'.
+  (text-mode-ispell-word-completion nil)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  
+  )

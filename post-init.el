@@ -184,7 +184,7 @@
     "e" 'eval-last-sexp
     "w" 'save-buffer
     "b" 'switch-to-buffer
-    "d" 'define-word
+    "d d" 'define-word
     "," 'other-window
     )
 
@@ -379,4 +379,7 @@
 (minimal-emacs-load-user-init "completion.el")
 
 
+;;;; highlight TODO, FIXME, &c.
+(use-package hl-todo
+  :hook (prog-mode org-mode markdown-mode))
 

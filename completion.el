@@ -18,6 +18,7 @@
   (vertico-mode))
 
 (use-package orderless
+  :demand t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
@@ -77,9 +78,14 @@
   :general
   (leader :states 'normal
           "l g" 'consult-ripgrep
-          "l f" 'consult-fd
+          "l f" 'find-file
           "l l" 'consult-locate
+          "l r" 'consult-recent-file
+          "l a" 'consult-org-agenda
+          :keymaps 'org-mode-map
+          "l h" 'consult-org-heading
           )
+  (general-define-key :states 'normal :keymaps 'override "C-h l" 'consult-info)
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
          ("C-c h" . consult-history)
@@ -180,6 +186,19 @@
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
 
+  :init
+  (setq read-file-name-function #'consult-find-file-with-preview)
+
+  (defun consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
+    (interactive)
+    (let ((default-directory (or dir default-directory))
+          (minibuffer-completing-file-name t))
+      (consult--read #'read-file-name-internal :state (consult--file-preview)
+                     :prompt prompt
+                     :initial initial
+                     :require-match mustmatch
+                     :predicate pred)))
+
 )
 
 
@@ -240,6 +259,12 @@
   ;; (add-hook 'completion-at-point-functions #'cape-history)
   ;; ...
   )
+
+(use-package prescient)
+(use-package corfu-prescient
+  :hook (corfu-mode . corfu-prescient-mode))
+(use-package vertico-prescient
+  :hook (corfu-mode . vertico-prescient-mode))
 
 (use-package emacs
   :custom

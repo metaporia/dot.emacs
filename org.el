@@ -47,6 +47,7 @@
   (org-startup-folded t)
   (org-hide-emphasis-markers t)
   :init
+  (add-hook 'org-capture-mode-hook #'org-align-all-tags)
   (setq org-agenda-files "~/org/agenda")
   (setq org-directory "~/org")
   (setq org-agenda-dim-blocked-tasks nil)
@@ -74,6 +75,7 @@
                         ("emacs" . ?e)
                         ("task" . ?t)
                         ("mental" . ?t)
+                        ("bruce" . ?b)
                         ))
 
   ;; MISC PRETTIFICATION
@@ -148,10 +150,25 @@
                  "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
                 ("n" "note" entry (file "~/org/refile.org")
                  "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-                ("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Bruce")
-                  "* Session Notes" :jump-to-captured 1)
-                ("p" "athey" entry (file+olp+datetree "~/org/mental.org" "Mental Health" "Athey")
-                 "* Session Notes" :jump-to-captured 1)
+                ;;("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Bruce") "* Session Notes" :jump-to-captured 1)
+                ;;("p" "athey" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Athey") "* Session Notes" :jump-to-captured 1)
+                ;; FIXME
+                ("b" "bruce" entry (file+datetree "~/org/log.org")
+                 "* Bruce Therapy :bruce:\n** Talking Points\n%?\n** Session Notes"
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
+                ("a" "athey" entry (file+datetree "~/org/log.org")
+                 "* Athey :athey:\n** Talking Points\n %?\n** Session Notes\n"
+                 ;;"* Athey :athey:\n ** Session Notes\n%?"
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
+                ("l" "log" entry (file+datetree "~/org/log.org")
+                 "* %? %^g "
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
                 ("j" "journal" entry (file+datetree "~/org/diary.org")
                  "* %?\n%U\n" :clock-in t :clock-resume t)
                 ("w" "org-protocol" entry (file "~/org/refile.org")

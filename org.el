@@ -96,7 +96,7 @@
 
 
   ;; pretttify todos
-  (setq org-log-done t
+  (setq ;org-log-done t
         org-auto-align-tags t
         org-tags-column -80
         org-fold-catch-invisible-edits 'show-and-error
@@ -128,10 +128,18 @@
         (quote ((sequence "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)")
                 (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@!)"))))
 
+  ;; todo keyword colors
+  (setq org-todo-keyword-faces
+        '(("TODO(t!)"      :inherit (org-todo region) :foreground  "#4C566A" :weight bold)
+          ))
+
+
   (setq org-enforce-todo-dependencies t)
   (setq org-enforce-todo-checkbox-dependencies t)
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
+
+  ; don't log time stamps when cycling org todo state
+  ;; (setq org-log-done 'time)
+  ;; (setq org-log-into-drawer t)
 
   (setq org-todo-state-tags-triggers
         (quote (("CANCELLED" ("CANCELLED" . t))
@@ -142,19 +150,36 @@
                 ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
                 ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 
+  ;; enter insert mode in org-captures
+  (add-hook 'org-capture-mode-hook 'evil-insert-state)
   ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
   (setq org-capture-templates
         (quote (("t" "todo" entry (file "~/org/refile.org")
-                 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                 "* TODO %?\n%U\n%a\n" )
                 ("r" "respond" entry (file "~/org/refile.org")
-                 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                 "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :immediate-finish t)
                 ("n" "note" entry (file "~/org/refile.org")
-                 "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                 "* %? :NOTE:\n%U\n%a\n" )
                 ;;("b" "bruce" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Bruce") "* Session Notes" :jump-to-captured 1)
                 ;;("p" "athey" entry (file+olp+datetree "~/org/mental.org" "Appointment Logs" "Athey") "* Session Notes" :jump-to-captured 1)
                 ;; FIXME
                 ("b" "bruce" entry (file+datetree "~/org/log.org")
                  "* Bruce Therapy :bruce:\n** Talking Points\n%?\n** Session Notes"
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
+                ("m" "medication" entry (file+olp "~/org/mental.org" "Medication Logs" "Lamictal")
+                 "* %t\n %?"
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
+                ("w" "weight" entry (file+olp "~/org/physical.org" "Weight")
+                 "* Measurement
+  :PROPERTIES:
+  :DATE: %U
+  :END:
+  weight: %?
+                  "
                  :jump-to-captured 1
                  :empty-lines 1
                  )
@@ -170,13 +195,14 @@
                  :empty-lines 1
                  )
                 ("j" "journal" entry (file+datetree "~/org/diary.org")
-                 "* %?\n%U\n" :clock-in t :clock-resume t)
+                 "* %?\n%U\n" )
                 ("w" "org-protocol" entry (file "~/org/refile.org")
                  "* TODO Review %c\n%U\n" :immediate-finish t)
                 ;;("m" "Meeting" entry (file "~/org/refile.org")
                 ;; "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
                 ("h" "habit" entry (file "~/org/refile.org")
                  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+
 
   ;; refile setup
 

@@ -378,6 +378,9 @@
 
 (minimal-emacs-load-user-init "completion.el")
 
+; for syncthing QOL
+(global-set-key (kbd "<f5>") 'revert-buffer)
+
 
 ;;;; highlight TODO, FIXME, &c.
 (use-package hl-todo

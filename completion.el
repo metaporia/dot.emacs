@@ -75,16 +75,17 @@
 ;; Example configuration for Consult
 (use-package consult
   ;; Replace bindings. Lazily loaded by `use-package'.
+  ;; :after evil
+  :ensure t
   :general
   (leader :states 'normal
           "l g" 'consult-ripgrep
-          "l f" 'find-file
+          "l f" 'consult-fd
           "l l" 'consult-locate
           "l r" 'consult-recent-file
-          "l a" 'consult-org-agenda
-          :keymaps 'org-mode-map
-          "l h" 'consult-org-heading
-          )
+          "l a" 'consult-org-agenda)
+  (leader :states 'normal :keymaps 'org-mode-map
+    "l h" 'consult-org-heading)
   (general-define-key :states 'normal :keymaps 'override "C-h l" 'consult-info)
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
@@ -186,8 +187,6 @@
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
 
-  :init
-  (setq read-file-name-function #'consult-find-file-with-preview)
 
   (defun consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
     (interactive)
@@ -199,6 +198,7 @@
                      :require-match mustmatch
                      :predicate pred)))
 
+  (setq read-file-name-function #'consult-find-file-with-preview)
 )
 
 

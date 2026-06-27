@@ -1,12 +1,20 @@
 ;;; post-init.el --- primary user config -*- no-byte-compile: t; lexical-binding: t; -*-
 
 (use-package compile-angel
+  :demand t
   :config
-  (compile-angel-on-load-mode)
-  (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode))
+  (setq package-native-compile nil)
+  (setq compile-angel-verbose nil)
+  (push "/init.el" compile-angel-excluded-files)
+  (push "/early-init.el" compile-angel-excluded-files)
+  (push "/pre-init.el" compile-angel-excluded-files)
+  (push "/post-init.el" compile-angel-excluded-files)
+  (push "/pre-early-init.el" compile-angel-excluded-files)
+  (push "/post-early-init.el" compile-angel-excluded-files)
+  (compile-angel-on-load-mode 1))
 
 ;;;; General
-(use-package general)
+(use-package general :demand t)
 
 ;;;; Misc Helpers
 
@@ -81,7 +89,7 @@
 ;;;; Helpful (better help w/ e.g., C-h k)
 
 (use-package helpful
-  :defer t
+  ;; NOTE: :defer removed — :bind already implies deferral
   :bind (
          ("C-h v" . helpful-variable)
          ("C-h k" . helpful-key)
@@ -254,7 +262,7 @@
 
 (use-package evil-collection
   :after evil
-  :ensure t
+  ;; NOTE: :ensure removed — redundant with straight-use-package-by-default t
   :custom
   (evil-collection-calendar-want-org-bindings t)
   (evil-collection-setup-minibuffer t)
@@ -264,27 +272,30 @@
 
 
 (use-package evil-escape
+  :after evil
   :config
   (evil-escape-mode)
   (setq-default evil-escape-key-sequence "jk"))
 
 (use-package evil-surround
+  :after evil
   :config
   (global-evil-surround-mode))
 
 (use-package evil-commentary
+  :after evil
   :bind (:map evil-normal-state-map ("g c" . evil-commentary)))
 
 ;; search with '*' and '#' from visual selection
 (use-package evil-visualstar
   :after evil
-  :ensure t
-  :defer t
+  ;; NOTE: :ensure removed — redundant with straight-use-package-by-default t
+  ;; NOTE: :defer removed — :commands and :hook already defer
   :commands global-evil-visualstar-mode
   :hook (after-init . global-evil-visualstar-mode))
 
 (use-package evil-org
-  :defer t
+  ;; NOTE: :defer removed — :after and :hook already defer
   :after org
   :hook (org-mode . evil-org-mode)
   :config
@@ -312,8 +323,8 @@
 
 
 (use-package doom-modeline
- :init
- (doom-modeline-mode t))
+ :config
+ (doom-modeline-mode 1))
 
 ;; for fresh install run M-x nerd-icons-install-fonts
 (use-package nerd-icons
@@ -358,7 +369,7 @@
 ;;;; Magit
 
 (use-package magit
-  :defer t
+  ;; NOTE: :defer removed — :commands already defers
   :commands magit-status
   :general
   (leader :states 'normal ;:keymaps 'override

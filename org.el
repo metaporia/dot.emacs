@@ -194,8 +194,14 @@
                  :jump-to-captured 1
                  :empty-lines 1
                  )
-                ("j" "journal" entry (file+datetree "~/org/diary.org")
-                 "* %?\n%U\n" )
+                ;; ("j" "journal" entry (file+datetree "~/org/diary.org")
+                ;;  "* %?\n%U\n" )
+                ("j" "journal" entry (file+headline "~/org/diary.org" "Journal")
+                 "* %U %?\n"
+                 :jump-to-captured 1
+                 :empty-lines 1
+                 )
+
                 ("w" "org-protocol" entry (file "~/org/refile.org")
                  "* TODO Review %c\n%U\n" :immediate-finish t)
                 ;;("m" "Meeting" entry (file "~/org/refile.org")

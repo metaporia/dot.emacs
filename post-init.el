@@ -116,7 +116,18 @@
 ;; must be set before evil and evil collection
 (setq evil-want-keybinding nil)
 
+;; claude-assisted
+;; Prevent all Emacs→Wayland clipboard/selection writes except via evil-wl-copy (, c).
+;; select-enable-clipboard nil: kills don't hit CLIPBOARD.
+;; select-enable-primary nil: kills don't hit PRIMARY.
+;; select-active-regions nil: active region (incl. evil visual mode) doesn't update PRIMARY.
+;; Without all three, GoldenDict-ng scan popup fires on every kill or visual selection.
+(setq select-enable-clipboard nil)
+(setq select-enable-primary nil)
+(setq select-active-regions nil)
+
 (use-package evil
+  :demand t
   :general
   (:states '(normal visual) :prefix "," :keymaps 'override
            "p"  (general-simulate-key "\"+p" :state 'normal
@@ -131,7 +142,7 @@
   (evil-visual-update-x-selection-p nil)
   (evil-kill-on-visual-paste nil)
   :init
-  ;;(fset 'evil-visual-update-x-selection 'ignore)
+  (fset 'evil-visual-update-x-selection 'ignore) ;; belt-and-suspenders: noop the function directly
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)

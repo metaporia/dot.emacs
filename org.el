@@ -125,8 +125,8 @@
         ;;
         ;; "/" enables dependency enforcement.
         ;;
-        (quote ((sequence "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)")
-                (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@!)"))))
+        (quote ((sequence "TODO(t!)" "NEXT(n)" "|" "DONE(d!)")
+                (sequence "WAITING(w@)" "HOLD(h@)" "|" "CANCELLED(c!)"))))
 
   ;; todo keyword colors
   (setq org-todo-keyword-faces
@@ -142,10 +142,11 @@
   ;; (setq org-log-into-drawer t)
 
   (setq org-todo-state-tags-triggers
-        (quote (("CANCELLED" ("CANCELLED" . t))
+        (quote (
+                ("CANCELLED" ("WAITING") ("CANCELLED" . t))
                 ("WAITING" ("WAITING" . t))
                 ("HOLD" ("WAITING") ("HOLD" . t))
-                (done ("WAITING") ("HOLD"))
+                (done ("WAITING") ("HOLD") ("CANCELLED"))
                 ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
                 ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
                 ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))

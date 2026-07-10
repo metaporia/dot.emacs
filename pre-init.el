@@ -2,6 +2,9 @@
 
 (setq use-package-always-ensure nil)
 
+;; Store lockfile in repo root rather than var/ (which is gitignored)
+(setq straight-profiles '((nil . "~/emacs/straight-versions.el")))
+
 ;; Straight
 (defvar bootstrap-version)
 (let ((bootstrap-file

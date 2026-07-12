@@ -51,6 +51,18 @@
   (setq org-agenda-files "~/org/agenda")
   (setq org-directory "~/org")
   (setq org-agenda-dim-blocked-tasks nil)
+
+  ;; claude-assisted: capture templates stamp an inactive timestamp (%U)
+  ;; as the first line of the entry body rather than SCHEDULED/DEADLINE.
+  ;; `tsia-down' picks that up automatically (TIMESTAMP_IA is one of
+  ;; org's special properties: org-entry-get scans the entry text for the
+  ;; first inactive timestamp -- no PROPERTIES drawer needed) and sorts
+  ;; `C-c a t' newest-first, falling back to urgency/category as before.
+  (setq org-agenda-sorting-strategy
+        '((agenda habit-down time-up urgency-down category-keep)
+          (todo tsia-down urgency-down category-keep)
+          (tags urgency-down category-keep)
+          (search category-keep)))
                                         ; enable org-indent-mode by default
   (setq org-startup-indented t)
   ;;(setq org-startup-folded 'fold)
@@ -248,11 +260,28 @@
 
   ;; custom agenda views (for monthly todos, &c.)
   ;; nice to have an example to build off of as we refine our agenda workflow
-  (setq org-agenda-custom-commands '(("n" "Agenda and all TODOs"
+  ;; claude-assisted: swapped `alltodo' (every TODO-state entry, subtasks
+  ;; included) for a NEXT-only block, so promoting TODO->NEXT is what makes
+  ;; an item visible instead of needing a dummy deadline to show in `C-c a a'.
+  (setq org-agenda-custom-commands '(("n" "Agenda and Next Actions"
                                       ((agenda "")
-                                        (alltodo "")))
+                                        (todo "NEXT")))
                                      ("f" occur-tree "\\<FIXME\\>")
                                      ))
+
+  ;; claude-assisted: `org-todo-list' hardcodes its "Press `N r' (e.g. `0
+  ;; r') to search again" reset hint into the compiled function itself, so
+  ;; it can't be overridden via a variable. Under evil, a leading 0 is the
+  ;; bol motion rather than a count, so `0 r' silently does nothing; relabel
+  ;; the hint to the sequence that actually resets to ALL (`M-0 r').
+  (defun my/org-agenda-relabel-reset-hint ()
+    (when (derived-mode-p 'org-agenda-mode)
+      (let ((inhibit-read-only t))
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward "0 r" (pos-eol 5) t)
+            (replace-match "M-0 r" t t))))))
+  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-relabel-reset-hint)
 
   ;; latex image stuff
   (setq org-format-options (plist-put org-format-latex-options :scale 2.0))

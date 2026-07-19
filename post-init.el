@@ -184,6 +184,14 @@
   ;; Global leader
   (general-create-definer leader :prefix ",")
   (general-create-definer local-leader :prefix "SPC")
+  ;; claude-assisted: separate leader on SPC for agenda/capture actions;
+  ;; `:keymaps 'override' so it wins over evil's normal-state SPC
+  ;; (forward-char, redundant with `l') and evil-org-agenda's SPC
+  ;; (org-agenda-show-and-scroll-up) inside agenda buffers.
+  (general-create-definer agenda-leader
+    :prefix "SPC"
+    :states '(normal motion)
+    :keymaps 'override)
 
   ;(defvar leader-map (make-sparse-keymap) "Keymap for <leader> binds")
 
@@ -205,6 +213,13 @@
     "b" 'switch-to-buffer
     "d d" 'define-word
     "," 'other-window
+    "a" 'my/org-agenda-fullscreen
+    )
+
+  (agenda-leader
+    "a" 'my/org-agenda-fullscreen
+    "c" 'org-capture
+    "t" 'my/org-capture-todo
     )
 
   ;; Local Leader
@@ -307,8 +322,9 @@
 
 (use-package evil-org
   ;; NOTE: :defer removed — :after and :hook already defer
+  :demand t
   :after org
-  :hook (org-mode . evil-org-mode)
+  :hook (org-mode . (lambda () evil-org-mode))
   :config
   ;; (add-hook 'evil-org-mode-hook
   ;;           (lambda ()

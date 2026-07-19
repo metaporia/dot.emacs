@@ -52,6 +52,19 @@
   (setq org-directory "~/org")
   (setq org-agenda-dim-blocked-tasks nil)
 
+  ;; claude-assisted: drop the leading `%-12:c' category prefix so
+  ;; TODO-keyword/priority/headline start flush left; the category is
+  ;; re-inserted on the right, after tags, by
+  ;; `my/org-agenda-category-suffix' below. `org-agenda-tags-column' is
+  ;; pinned to a fixed column (rather than the default `auto', which
+  ;; flushes tags to the true window edge) to leave room for it.
+  (setq org-agenda-prefix-format
+        '((agenda  . " %i %-12t% s")
+          (todo    . " %i ")
+          (tags    . " %i ")
+          (search  . " %i ")))
+  (setq org-agenda-tags-column -90)
+
   ;; claude-assisted: capture templates stamp an inactive timestamp (%U)
   ;; as the first line of the entry body rather than SCHEDULED/DEADLINE.
   ;; `tsia-down' picks that up automatically (TIMESTAMP_IA is one of
@@ -76,7 +89,8 @@
   ;; display remote inline images
   (setq org-display-remote-inline-images 'download)
 
-  (setq org-tag-alist '(("code" . ?c)
+  (setq org-tag-alist '(("nvim" . ?v)
+                        ("code" . ?c)
                         ("meta" . ?m)
                         ("note" . ?n)
                         ("personal" . ?p)
@@ -137,7 +151,7 @@
         ;;
         ;; "/" enables dependency enforcement.
         ;;
-        (quote ((sequence "TODO(t!)" "NEXT(n)" "|" "DONE(d!)")
+        (quote ((sequence "TODO(t!)" "NEXT(n)" "SOMEDAY(s)" "|" "DONE(d!)")
                 (sequence "WAITING(w@)" "HOLD(h@)" "|" "CANCELLED(c!)"))))
 
   ;; todo keyword colors
@@ -254,6 +268,19 @@
   ;; agenda bindings
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-ca" 'org-agenda)
+
+  ;; claude-assisted: <leader>a opens the agenda dispatcher fullscreen
+  ;; (deletes other windows), while `C-c a' above keeps opening in a split.
+  (defun my/org-agenda-fullscreen ()
+    (interactive)
+    (let ((org-agenda-window-setup 'only-window))
+      (call-interactively 'org-agenda)))
+
+  ;; claude-assisted: skips org-capture's template-selection prompt by
+  ;; passing the "t" key directly, per <agenda-leader>t.
+  (defun my/org-capture-todo ()
+    (interactive)
+    (org-capture nil "t"))
   (global-set-key "\C-cc" 'org-capture)
   (global-set-key "\C-cb" 'org-switchb)
   (global-set-key (kbd "C-'") 'org-cycle-agenda-files)
@@ -263,11 +290,25 @@
   ;; claude-assisted: swapped `alltodo' (every TODO-state entry, subtasks
   ;; included) for a NEXT-only block, so promoting TODO->NEXT is what makes
   ;; an item visible instead of needing a dummy deadline to show in `C-c a a'.
-  (setq org-agenda-custom-commands '(("n" "Agenda and Next Actions"
-                                      ((agenda "")
-                                        (todo "NEXT")))
-                                     ("f" occur-tree "\\<FIXME\\>")
-                                     ))
+  ;; claude-assisted
+  ;; claude-assisted: added a "Prioritized" block matching TODO/NEXT items
+  ;; that carry a priority cookie, sorted priority-down; SOMEDAY is excluded
+  ;; since it already has its own section above.
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda and Next Actions"
+           ((agenda "")
+            (todo "NEXT"
+                  ((org-agenda-overriding-header "Next Actions")
+                   (org-agenda-sorting-strategy '(priority-down tsia-down))))
+            (todo "SOMEDAY"
+                  ((org-agenda-overriding-header "Someday / Longterm")
+                   (org-agenda-todo-ignore-scheduled 'future)
+                   (org-agenda-sorting-strategy '(priority-down tsia-down))))
+            (tags-todo "TODO={TODO\\|NEXT}+PRIORITY<>\"\""
+                  ((org-agenda-overriding-header "Prioritized")
+                   (org-agenda-sorting-strategy '(priority-down))))))
+          ("s" "Someday" todo "SOMEDAY")
+          ("f" occur-tree "\\<FIXME\\>")))
 
   ;; claude-assisted: `org-todo-list' hardcodes its "Press `N r' (e.g. `0
   ;; r') to search again" reset hint into the compiled function itself, so
@@ -282,6 +323,26 @@
           (when (re-search-forward "0 r" (pos-eol 5) t)
             (replace-match "M-0 r" t t))))))
   (add-hook 'org-agenda-finalize-hook #'my/org-agenda-relabel-reset-hint)
+
+  ;; claude-assisted: `org-agenda-prefix-format' above dropped the leading
+  ;; category prefix; re-insert it here as a dimmed suffix, right after the
+  ;; tags column (`org-agenda-tags-column'), so each line reads
+  ;; "TODO [#A] headline ... :tags:  category".
+  (defun my/org-agenda-category-suffix ()
+    (when (derived-mode-p 'org-agenda-mode)
+      (let ((inhibit-read-only t)
+            (col (+ (abs org-agenda-tags-column) 2)))
+        (save-excursion
+          (goto-char (point-min))
+          (while (not (eobp))
+            (let ((category (org-get-at-bol 'org-category)))
+              (when category
+                (end-of-line)
+                (when (< (current-column) col)
+                  (insert (make-string (- col (current-column)) ?\s)))
+                (insert (propertize category 'face 'org-agenda-dimmed-todo-face))))
+            (forward-line 1))))))
+  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-category-suffix)
 
   ;; latex image stuff
   (setq org-format-options (plist-put org-format-latex-options :scale 2.0))
@@ -372,12 +433,13 @@
   ;;(setq org-superstar-leading-bullet " ")
   (setq org-superstar-headline-bullets-list '("◉" "○" "⚬" "◈" "◇"))
   (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
-  (setq org-superstar-todo-bullet-alist '(("TODO"  . 9744)
-                                          ("WAIT"  . 9744)
-                                          ("READ"  . 9744)
-                                          ("NEXT"  . 9744)
-                                          ("PROG"  . 9744)
-                                          ("DONE"  . 9745)))
+  (setq org-superstar-todo-bullet-alist '(("TODO"    . 9744)
+                                          ("WAIT"    . 9744)
+                                          ("READ"    . 9744)
+                                          ("NEXT"    . 9744)
+                                          ("PROG"    . 9744)
+                                          ("SOMEDAY" . 9744)
+                                          ("DONE"    . 9745)))
   :hook (org-mode . org-superstar-mode))
 
 ;; org prettification
